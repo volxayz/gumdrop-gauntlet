@@ -45,6 +45,7 @@ function startRun() {
   unlockAudio();
   playSound('start');
   app.game = createGame((Date.now() & 0xffffff) ^ 0x5eed);
+  app.dejavuQueued = false;
   app.screen = 'game';
   app.paused = false;
   app.newBest = false;
@@ -112,10 +113,15 @@ function frame(now) {
     const g = app.game;
     acc += dt;
     const controls = input.controls();
+    // A Déjà Vu press on a frame with no fixed step waits for the next step instead of vanishing.
+    if (controls.dejavu) app.dejavuQueued = true;
+    controls.dejavu = app.dejavuQueued === true;
     while (acc >= STEP) {
       const before = g.mode;
       stepGame(g, controls, STEP);
       controls.dash = false;
+      controls.dejavu = false;
+      app.dejavuQueued = false;
       if (before !== g.mode && (g.mode === 'victory' || g.mode === 'defeat')) finishRun();
       acc -= STEP;
     }

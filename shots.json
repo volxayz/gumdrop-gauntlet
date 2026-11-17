@@ -1,6 +1,6 @@
 [
-  { "name": "1-boss-fight.jpg", "query": "?shot=boss&seed=9" },
-  { "name": "2-title.jpg", "query": "?shot=title&seed=9" },
-  { "name": "3-upgrade-pick.jpg", "query": "?shot=upgrade&seed=9" },
-  { "name": "4-results.jpg", "query": "?shot=results&seed=9" }
+  { "name": "1-boss-fight.jpg", "query": "?shot=boss&seed=6" },
+  { "name": "2-title.jpg", "query": "?shot=title&seed=6" },
+  { "name": "3-upgrade-pick.jpg", "query": "?shot=upgrade&seed=6" },
+  { "name": "4-results.jpg", "query": "?shot=results&seed=6" }
 ]

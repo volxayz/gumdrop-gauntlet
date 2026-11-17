@@ -3,7 +3,7 @@ import { VIEW } from './config.js';
 
 /** A fresh, idle control state: what the simulation reads every step. */
 export function emptyControls() {
-  return { moveX: 0, moveY: 0, aimX: VIEW.width / 2, aimY: 0, fire: false, dash: false };
+  return { moveX: 0, moveY: 0, aimX: VIEW.width / 2, aimY: 0, fire: false, dash: false, dejavu: false };
 }
 
 /** Wire up the page's keyboard and mouse. Returns { controls(), pressed(code), mouse, clicked() }. */
@@ -63,6 +63,7 @@ export function createInput(canvas, toLogical) {
         aimY: mouse.y,
         fire: mouse.left || held('KeyJ'),
         dash: fresh.has('Space') || fresh.has('ShiftLeft') || fresh.has('MouseRight'),
+        dejavu: fresh.has('KeyE'),
       };
     },
   };

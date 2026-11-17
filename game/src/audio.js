@@ -106,6 +106,17 @@ const SOUNDS = {
   win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone('square', f, f, 0.18, 0.1, 0.3 + i * 0.12)),
   results: () => {},
   lose: () => [392, 330, 262, 196].forEach((f, i) => tone('triangle', f, f * 0.98, 0.3, 0.15, i * 0.22)),
+  // Déjà Vu: a glassy shimmer when an echo is left behind...
+  dejavuSet: () => [1047, 1319, 1568].forEach((f, i) => { tone('sine', f, f * 1.01, 0.32, 0.09, i * 0.05); tone('sine', f * 1.5, f * 1.49, 0.25, 0.04, 0.12 + i * 0.05); }),
+  // ...and when they are unleashed: a rising "rewind" sweep, a detuned chord, then a sparkle that echoes three times.
+  dejavu: () => {
+    tone('sawtooth', 90, 1400, 0.45, 0.14);
+    tone('sawtooth', 93, 1450, 0.45, 0.1);
+    noise(0.5, 0.35, 7000, 0.3);
+    [392, 494, 587, 784].forEach((f) => { tone('square', f, f, 0.6, 0.05, 0.42); tone('triangle', f * 1.006, f, 0.6, 0.07, 0.42); });
+    [0, 0.18, 0.36].forEach((d, i) => tone('sine', 2093, 1568, 0.2, 0.12 / (i + 1), 0.5 + d));
+  },
+  dejavuVolley: () => tone('triangle', 1200, 700, 0.07, 0.05),
   click: () => tone('sine', 900, 1200, 0.06, 0.12),
   start: () => [392, 523, 659, 784].forEach((f, i) => tone('square', f, f, 0.1, 0.1, i * 0.06)),
 };

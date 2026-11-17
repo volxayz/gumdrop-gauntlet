@@ -44,7 +44,29 @@ export const BOSS = {
 /** Waves 1..7 are critter waves, wave 8 is the boss. */
 export const LAST_WAVE = 8;
 
-export const COMBO = { window: 2.2, maxMultiplier: 8 };
+/** Déjà Vu: the kill gauge, the echoes it leaves, and the barrage they fire when unleashed. */
+export const DEJAVU = {
+  gaugeMax: 100,
+  /** A head start, so the first echo lands near the end of wave 1. */
+  startGauge: 50,
+  perKill: { default: 6, gobstopper: 12, minigob: 3 },
+  /** Gauge points per point of damage dealt to the boss. */
+  perBossDamage: 1 / 25,
+  maxEchoes: 5,
+  clearRadius: 130,
+  volleys: 8,
+  volleyGap: 0.16,
+  fadeTime: 0.5,
+  shotsPerVolley: 18,
+  shotSpeed: 620,
+  shotRadius: 10,
+  shotDamage: 10,
+  shotPierce: 1,
+  color: '#c86bff',
+  glow: '#ff7af0',
+};
+
+export const COMBO ={ window: 2.2, maxMultiplier: 8 };
 
 /** The candy palette. */
 export const COLOR = {

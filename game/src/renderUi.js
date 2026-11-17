@@ -1,5 +1,5 @@
 // Screens and HUD: the title, the in-game HUD and hints, the upgrade cards, pause, and the results.
-import { BOSS, COLOR, FONT, LAST_WAVE, PLAYER, VIEW } from './config.js';
+import { BOSS, COLOR, DEJAVU, FONT, LAST_WAVE, PLAYER, VIEW } from './config.js';
 import { upgradeById } from './upgrades.js';
 import { PHASES } from './boss.js';
 import { WAVE_TITLES } from './waves.js';
@@ -126,8 +126,80 @@ export function drawHud(ctx, state, time) {
     ctx.strokeRect(x, y + 34, w, 24);
   }
 
+  drawDejavuMeter(ctx, state, time);
   drawHint(ctx, state, time);
   drawBanner(ctx, state);
+}
+
+/** Bottom right: the Déjà Vu gauge, the echoes placed (0..5) and the E key to unleash them. */
+function drawDejavuMeter(ctx, state, time) {
+  const dv = state.dejavu;
+  const n = dv.echoes.length;
+  const ready = n > 0 && !dv.burst;
+  const x = VIEW.width - 296;
+  const y = VIEW.height - 96;
+  const w = 286;
+  panel(ctx, x, y, w, 88, 'rgba(58,20,64,0.88)', 18);
+  ctx.strokeStyle = ready ? DEJAVU.glow : 'rgba(200,107,255,0.6)';
+  ctx.lineWidth = ready ? 4 + Math.sin(time * 8) * 1.5 : 3;
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, 88, 18);
+  ctx.stroke();
+  bigText(ctx, 'DÉJÀ VU', x + 16, y + 22, 26, DEJAVU.color, 'left', 0.18);
+
+  // Echo pips: filled for each echo waiting on the floor.
+  for (let i = 0; i < DEJAVU.maxEchoes; i += 1) {
+    const px = x + 168 + i * 22;
+    ctx.fillStyle = i < n ? DEJAVU.glow : 'rgba(255,255,255,0.18)';
+    ctx.strokeStyle = i < n ? '#ffffff' : 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(px, y + 22, i < n ? 9 + Math.sin(time * 6 + i) * 1.2 : 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  // The gauge, in a candy-stripe gradient.
+  const gx = x + 14;
+  const gy = y + 46;
+  const gw = w - 90;
+  const k = n >= DEJAVU.maxEchoes ? 1 : dv.gauge / DEJAVU.gaugeMax;
+  ctx.fillStyle = 'rgba(255,255,255,0.16)';
+  ctx.beginPath();
+  ctx.roundRect(gx, gy, gw, 26, 13);
+  ctx.fill();
+  if (k > 0) {
+    const grad = ctx.createLinearGradient(gx, 0, gx + gw, 0);
+    grad.addColorStop(0, '#29c6ff');
+    grad.addColorStop(0.5, DEJAVU.color);
+    grad.addColorStop(1, DEJAVU.glow);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(gx, gy, Math.max(26, gw * k), 26, 13);
+    ctx.fill();
+  }
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(gx, gy, gw, 26, 13);
+  ctx.stroke();
+  if (n >= DEJAVU.maxEchoes) bigText(ctx, 'MAX', gx + gw / 2, gy + 14, 18, '#ffffff', 'center', 0.25);
+
+  // The key.
+  const kx = x + w - 40;
+  const ky = y + 59;
+  const pop = ready ? 1 + Math.sin(time * 10) * 0.1 : 1;
+  ctx.save();
+  ctx.translate(kx, ky);
+  ctx.scale(pop, pop);
+  panel(ctx, -24, -22, 48, 44, ready ? DEJAVU.glow : 'rgba(255,255,255,0.2)', 10);
+  ctx.strokeStyle = ready ? '#ffffff' : 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(-24, -22, 48, 44, 10);
+  ctx.stroke();
+  bigText(ctx, 'E', 0, 1, 30, '#ffffff', 'center', 0.2);
+  ctx.restore();
 }
 
 function drawHint(ctx, state, time) {
@@ -201,16 +273,16 @@ export function drawTitle(ctx, time, best) {
   ctx.fillText('and knock QUEEN SOURBELLE off her throne!', CX, 380);
 
   // Controls.
-  const keys = [['W A S D', 'MOVE'], ['MOUSE', 'AIM + SHOOT'], ['SPACE', 'DASH']];
+  const keys = [['W A S D', 'MOVE'], ['MOUSE', 'AIM + SHOOT'], ['SPACE', 'DASH'], ['E', 'DÉJÀ VU']];
   keys.forEach(([key, label], i) => {
-    const x = CX - 300 + i * 300;
-    panel(ctx, x - 130, 418, 260, 72, '#ffffff', 16);
-    ctx.strokeStyle = COLOR.ink;
+    const x = CX - 375 + i * 250;
+    panel(ctx, x - 115, 418, 230, 72, '#ffffff', 16);
+    ctx.strokeStyle = i === 3 ? DEJAVU.color : COLOR.ink;
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.roundRect(x - 130, 418, 260, 72, 16);
+    ctx.roundRect(x - 115, 418, 230, 72, 16);
     ctx.stroke();
-    bigText(ctx, key, x, 442, 28, '#29c6ff', 'center', 0.14);
+    bigText(ctx, key, x, 442, 28, i === 3 ? DEJAVU.color : '#29c6ff', 'center', 0.14);
     ctx.font = `20px ${FONT}`;
     ctx.fillStyle = COLOR.ink;
     ctx.fillText(label, x, 474);

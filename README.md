@@ -6,8 +6,9 @@
 
 **Gumdrop Gauntlet** is a bright candy-arena shooter for desktop browsers. You are Gummo, a blue gumdrop with a candy blaster. Pop seven waves of sour critters, pick an upgrade card after each wave, then take on Queen Sourbelle, a three-phase boss.
 
-- **Controls:** W A S D to move, the mouse to aim, hold left click to shoot, Space to dash (you can't be hit while dashing). 1/2/3 or a click picks an upgrade, P pauses and M mutes.
+- **Controls:** W A S D to move, the mouse to aim, hold left click to shoot, Space to dash (you can't be hit while dashing), **E to unleash Déjà Vu**. 1/2/3 or a click picks an upgrade, P pauses and M mutes.
 - **Critters:** Jellybobs hop toward you. Sprinkler donuts fire spreads. Gobstoppers split into three when popped. Licorice Zippers show a red line before they charge.
+- **Déjà Vu:** every critter you pop fills the Déjà Vu gauge. When it is full, a wavering see-through echo of Gummo is left where you stand (up to five, and they stay between waves). Press E and every echo snaps into the real world at once, wipes out the enemy drops around it and sprays a candy barrage in every direction, with its own shake, flash, banner and synth sound. Hitting the queen fills the gauge too, so you can set a trap in the boss fight.
 - **Upgrades that change how you play:** Split Shot fans, Bouncy Gum ricochets, orbiting Mint Moons, a burning Syrup Dash trail, piercing Rock Candy, homing Fizz Seekers, chain-exploding Pop Rocks and a Caramel Shell, plus stat cards.
 - **Boss phases:** *Lemon Waltz* fires bullet rings. *Sour Storm* fires spirals and summons critters. *Sugar Crash* adds telegraphed charges and shockwave bursts.
 - **Feel:** screen shake, hit-stop, particles, combo multipliers and floating score. Sound effects and three background tracks are all synthesised with Web Audio. On-screen hints teach the controls during the first wave, and the run ends on a results screen with a rank, stats, your best score and one-click restart.

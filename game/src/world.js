@@ -9,6 +9,7 @@ import { updateCombat, updateShots } from './combat.js';
 import { startWave, updateWave } from './waves.js';
 import { applyUpgrade, rollChoices } from './upgrades.js';
 import { createEffects, floatText, showBanner, updateEffects } from './effects.js';
+import { createDejavu, requestDejavu, updateDejavu } from './dejavu.js';
 
 export function createGame(seed) {
   const state = {
@@ -35,8 +36,9 @@ export function createGame(seed) {
     combo: 0,
     comboTimer: 0,
     fx: createEffects(),
+    dejavu: createDejavu(),
     events: [],
-    stats: { kills: 0, shots: 0, dashes: 0, moved: 0, hitsTaken: 0, bestCombo: 0, bossDamage: 0 },
+    stats: { kills: 0, shots: 0, dashes: 0, moved: 0, hitsTaken: 0, bestCombo: 0, bossDamage: 0, dejavus: 0, dejavuKills: 0 },
   };
   startWave(state, 1);
   return state;
@@ -62,6 +64,7 @@ export function pickUpgrade(state, index) {
 export function stepGame(state, controls, dt) {
   state.modeTime += dt;
   const fx = state.fx;
+  if (controls.dejavu) requestDejavu(state);
   if (fx.hitStop > 0) {
     fx.hitStop -= dt;
     updateEffects(fx, state.rng, dt * 0.25);
@@ -72,7 +75,8 @@ export function stepGame(state, controls, dt) {
   if (state.mode === 'play' || state.mode === 'outro') {
     state.time += dt;
     if (state.mode === 'play' && (controls.moveX !== 0 || controls.moveY !== 0)) state.stats.moved += dt;
-    updatePlayer(state, state.mode === 'play' ? controls : { ...controls, fire: false, dash: false, moveX: 0, moveY: 0 }, dt);
+    updatePlayer(state, state.mode === 'play' ? controls : { ...controls, fire: false, dash: false, dejavu: false, moveX: 0, moveY: 0 }, dt);
+    updateDejavu(state, dt);
     updateEnemies(state, dt);
     updateBoss(state, dt);
     updateBullets(state, dt);

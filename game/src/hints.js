@@ -6,11 +6,17 @@ const STEPS = [
   { key: 'dash', text: 'SPACE to DASH', sub: 'You are untouchable while dashing!', done: (s) => s.stats.dashes > 0 },
 ];
 
+const DEJAVU_FILL = { key: 'dejavuFill', text: 'POP CRITTERS = DÉJÀ VU', sub: 'A full gauge leaves an echo of you behind (up to 5)' };
+const DEJAVU_USE = { key: 'dejavuUse', text: 'PRESS  E  FOR DÉJÀ VU!', sub: 'Your echoes come alive and spray a barrage' };
+
 /** The hint to show now, or null once the player has done them all (or the moment has passed). */
 export function currentHint(state) {
   if (state.mode !== 'play') return null;
+  // Teach the key the moment the first echo exists, until it has been used once.
+  if (state.stats.dejavus === 0 && state.dejavu.echoes.length > 0) return DEJAVU_USE;
   if (state.wave === 1) {
     for (const step of STEPS) if (!step.done(state)) return step;
+    if (state.stats.dejavus === 0) return DEJAVU_FILL;
     return null;
   }
   if (state.wave === 2 && state.waveClock < 4) {

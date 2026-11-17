@@ -1,5 +1,6 @@
 // Draws the arena and everything in it: floor, syrup, shots, bullets, critters, boss, particles.
-import { ARENA, COLOR, FONT, VIEW } from './config.js';
+import { ARENA, COLOR, DEJAVU, FONT, VIEW } from './config.js';
+import { burstFade } from './dejavu.js';
 import { orbitPositions } from './player.js';
 import { PHASES } from './boss.js';
 import { drawBoss, drawCritter, drawGummo } from './sprites.js';
@@ -39,8 +40,64 @@ export function drawArena(ctx, time, tint = null) {
   }
 }
 
+/** A wavering, see-through Gummo: a Déjà Vu echo waiting to be unleashed. */
+function drawEcho(ctx, echo, time) {
+  const t = time * 3 + echo.phase;
+  const appear = Math.min(1, echo.age * 3);
+  ctx.save();
+  // Soft glow on the floor.
+  ctx.globalAlpha = 0.35 * appear;
+  ctx.fillStyle = DEJAVU.glow;
+  ctx.beginPath();
+  ctx.ellipse(echo.x, echo.y + 28, 52 + Math.sin(t * 2) * 6, 16, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Two slipping afterimages, then the echo itself.
+  const ghost = { radius: 30, squash: 0.15 + Math.sin(t * 1.3) * 0.15, aim: echo.aim, dashTimer: 0, hurtFlash: 0 };
+  ctx.globalAlpha = 0.18 * appear;
+  drawGummo(ctx, { ...ghost, x: echo.x + Math.sin(t * 2.3) * 12, y: echo.y - 6, tint: DEJAVU.glow }, time);
+  drawGummo(ctx, { ...ghost, x: echo.x - Math.sin(t * 1.7) * 12, y: echo.y + 4, tint: '#29c6ff' }, time);
+  ctx.globalAlpha = (0.45 + Math.sin(t * 4) * 0.08) * appear;
+  drawGummo(ctx, { ...ghost, x: echo.x, y: echo.y + Math.sin(t) * 4, tint: DEJAVU.color }, time);
+  ctx.restore();
+}
+
+/** An unleashed echo: solid, haloed, firing its barrage, then fading out. */
+function drawLiveEcho(ctx, echo, fade, time) {
+  ctx.save();
+  ctx.globalAlpha = 1 - fade;
+  const pulse = 1 + Math.sin(time * 20) * 0.08;
+  ctx.strokeStyle = DEJAVU.glow;
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.arc(echo.x, echo.y, 52 * pulse, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(echo.x, echo.y, 62 * pulse, 0, Math.PI * 2);
+  ctx.stroke();
+  drawGummo(ctx, { x: echo.x, y: echo.y, radius: 32, squash: 0.5 + Math.sin(time * 25) * 0.3, aim: echo.aim + time * 6, dashTimer: 0, hurtFlash: 0, tint: DEJAVU.color }, time);
+  ctx.restore();
+}
+
 function drawShots(ctx, state) {
   for (const s of state.shots) {
+    if (s.dejavu) {
+      ctx.fillStyle = DEJAVU.glow;
+      ctx.globalAlpha = 0.4;
+      ctx.beginPath();
+      ctx.arc(s.x - s.vx * 0.02, s.y - s.vy * 0.02, s.radius * 1.7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = DEJAVU.color;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      continue;
+    }
     ctx.fillStyle = COLOR.shotGlow;
     ctx.globalAlpha = 0.35;
     ctx.beginPath();
@@ -155,6 +212,11 @@ export function drawWorld(ctx, state, time) {
   const tint = boss && boss.phase === 2 ? 'rgba(255, 59, 92, 0.12)' : boss && boss.phase === 1 ? 'rgba(255, 155, 47, 0.1)' : null;
   drawArena(ctx, time, tint);
   drawPuddles(ctx, state);
+  for (const echo of state.dejavu.echoes) drawEcho(ctx, echo, time);
+  if (state.dejavu.burst) {
+    const fade = burstFade(state.dejavu.burst);
+    for (const echo of state.dejavu.burst.echoes) drawLiveEcho(ctx, echo, fade, time);
+  }
   for (const e of state.enemies) drawCritter(ctx, e, state.player);
   if (state.boss && !state.boss.dead) drawBoss(ctx, state.boss, PHASES, state.player, time);
   drawShots(ctx, state);

@@ -1,10 +1,11 @@
 // Every collision: shots, mint moons and syrup against critters and the boss; danger against Gummo.
-import { ARENA, BOSS, COMBO, ENEMY } from './config.js';
+import { ARENA, BOSS, COMBO, DEJAVU, ENEMY } from './config.js';
 import { level } from './upgrades.js';
 import { orbitPositions } from './player.js';
 import { spawnEnemy } from './enemies.js';
 import { PHASES } from './boss.js';
 import { addFlash, addHitStop, addShake, burst, floatText, ring } from './effects.js';
+import { chargeDejavu, killCharge } from './dejavu.js';
 
 const touching = (a, b, extra = 0) => {
   const r = a.radius + b.radius + extra;
@@ -37,6 +38,7 @@ export function damage(state, target, amount) {
   target.flash = 0.08;
   if (target === state.boss) {
     state.stats.bossDamage += amount;
+    chargeDejavu(state, Math.min(amount, target.hp + amount) * DEJAVU.perBossDamage);
     if (target.hp <= 0) killBoss(state);
     return;
   }
@@ -61,6 +63,8 @@ function killEnemy(state, e) {
   e.dead = true;
   const type = ENEMY[e.kind];
   state.stats.kills += 1;
+  if (state.dejavu.burst) state.stats.dejavuKills += 1;
+  chargeDejavu(state, killCharge(e.kind));
   addScore(state, type.score, e.x, e.y);
   burst(state.fx, state.rng, e.x, e.y, type.color, 18, 320, 9);
   burst(state.fx, state.rng, e.x, e.y, '#ffffff', 6, 200, 6);
@@ -126,7 +130,7 @@ export function hurtPlayer(state) {
 export function updateShots(state, dt) {
   const homing = level(state, 'homing');
   for (const s of state.shots) {
-    if (homing > 0) {
+    if (homing > 0 && !s.dejavu) {
       const t = nearestTarget(state, s.x, s.y);
       if (t) {
         const want = Math.atan2(t.y - s.y, t.x - s.x);

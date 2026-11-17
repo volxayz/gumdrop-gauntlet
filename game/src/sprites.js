@@ -43,7 +43,7 @@ export function drawGummo(ctx, p, time) {
   if (p.dashTimer > 0) ctx.rotate(Math.atan2(p.dashY, p.dashX) * 0.15);
   ctx.scale(stretch, 2 - stretch);
   const blink = p.hurtFlash > 0 && Math.floor(time * 30) % 2 === 0;
-  ctx.fillStyle = blink ? '#ffffff' : COLOR.hero;
+  ctx.fillStyle = blink ? '#ffffff' : (p.tint ?? COLOR.hero);
   ctx.strokeStyle = INK;
   ctx.lineWidth = 5;
   ctx.beginPath();

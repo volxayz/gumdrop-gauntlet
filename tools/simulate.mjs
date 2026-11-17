@@ -8,5 +8,5 @@ for (let seed = 1; seed <= runs; seed += 1) {
   const scene = buildShotScene('results', seed);
   const g = scene.game;
   const boss = g.boss ? `boss hp ${Math.round(g.boss.hp)} phase ${g.boss.phase + 1}` : 'no boss';
-  console.log(`seed ${seed}: ${g.mode} wave ${g.wave} score ${g.score} kills ${g.stats.kills} hits ${g.stats.hitsTaken} time ${g.time.toFixed(0)}s ${boss} upgrades ${JSON.stringify(g.upgrades)} (${Date.now() - started} ms)`);
+  console.log(`seed ${seed}: ${g.mode} wave ${g.wave} score ${g.score} kills ${g.stats.kills} hits ${g.stats.hitsTaken} dejavu ${g.stats.dejavus}x/${g.stats.dejavuKills}kills time ${g.time.toFixed(0)}s ${boss} upgrades ${JSON.stringify(g.upgrades)} (${Date.now() - started} ms)`);
 }

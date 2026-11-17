@@ -2,7 +2,7 @@
 // Each one plays the real rules forward from a fresh seeded run, steered by a simple autopilot
 // (dodge bullets and critters, keep a kiting distance, shoot the nearest foe, dash when cornered),
 // so a frame shows what a real run looks like and the same seed always gives the same frame.
-import { ARENA, LAST_WAVE, STEP } from './config.js';
+import { ARENA, DEJAVU, LAST_WAVE, STEP } from './config.js';
 import { createGame, pickUpgrade, stepGame } from './world.js';
 
 const PREFERENCE = ['split', 'pierce', 'orbit', 'homing', 'poprocks', 'bounce', 'rapid', 'heart', 'shield', 'trail'];
@@ -54,6 +54,12 @@ export function autopilot(state) {
   ax += ((cx - p.x) / 600) * 1.2;
   ay += ((cy - p.y) / 300) * 1.2;
   const len = Math.hypot(ax, ay);
+  // Déjà Vu: save echoes up, then unleash them on a crowd, the queen, or a full set.
+  const dv = state.dejavu;
+  const echoes = dv.echoes.length;
+  const bossUp = state.boss && !state.boss.dead && state.boss.entering <= 0 && state.boss.transition <= 0;
+  const dejavu = !dv.burst && echoes > 0 && (echoes >= DEJAVU.maxEchoes || (echoes >= 3 && foes.length >= 8)
+    || (bossUp && echoes >= 3) || (danger && p.hp <= 1 && p.dashCooldown > 0));
   return {
     moveX: len > 0.15 ? ax / len : 0,
     moveY: len > 0.15 ? ay / len : 0,
@@ -61,6 +67,7 @@ export function autopilot(state) {
     aimY: target ? target.y : p.y - 100,
     fire: target !== null,
     dash: danger && p.dashCooldown <= 0,
+    dejavu,
   };
 }
 
@@ -96,14 +103,16 @@ export function buildShotScene(name, seed) {
   game.stats.moved = 5;
   game.stats.shots = 50;
   game.stats.dashes = 1;
+  game.stats.dejavus = 1;
   if (name === 'play') {
     playUntil(game, (s) => s.wave === 4 && s.waveClock > 9 && s.mode === 'play' && s.enemies.length >= 6);
   } else if (name === 'upgrade') {
     playUntil(game, (s) => s.wave === 3 && s.mode === 'upgrade' && s.modeTime > 0.5);
     ui.hover = 0;
   } else if (name === 'boss') {
-    playUntil(game, (s) => s.boss && s.boss.phase === 1 && s.boss.transition <= 0 && s.player.invulnerable <= 0
-      && s.bullets.length > 30 && s.enemies.length > 0);
+    // The cover: Queen Sourbelle mid-fight while a Déjà Vu barrage is in full swing.
+    playUntil(game, (s) => s.boss && s.boss.phase >= 1 && s.boss.transition <= 0 && s.player.invulnerable <= 0
+      && s.dejavu.burst && s.dejavu.burst.echoes.length >= 2 && s.dejavu.burst.time > 0.5 && s.bullets.length > 12);
   } else {
     playUntil(game, (s) => (s.mode === 'victory' || s.mode === 'defeat') && s.modeTime > 0.6);
     ui.best = game.score;

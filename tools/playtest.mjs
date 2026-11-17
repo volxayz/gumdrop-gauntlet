@@ -42,7 +42,7 @@ try {
     writeFileSync(join(outDir, `${name}.jpg`), Buffer.from(r.result.data, 'base64'));
     console.log(`snapshot ${name}`);
   };
-  const keyCodes = { KeyW: 87, KeyA: 65, KeyS: 83, KeyD: 68, Space: 32, Enter: 13, Digit1: 49, Digit2: 50, KeyP: 80, Escape: 27 };
+  const keyCodes = { KeyW: 87, KeyA: 65, KeyS: 83, KeyD: 68, Space: 32, Enter: 13, Digit1: 49, Digit2: 50, KeyP: 80, Escape: 27, KeyE: 69 };
   const key = (type, code) => send('Input.dispatchKeyEvent', { type, code, key: code === 'Space' ? ' ' : code.replace('Key', '').replace('Digit', ''), windowsVirtualKeyCode: keyCodes[code] });
   const tap = async (code) => { await key('keyDown', code); await sleep(30); await key('keyUp', code); };
   const mouse = (type, x, y, extra = {}) => send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1, ...extra });
@@ -91,6 +91,7 @@ try {
     await mouse('mouseMoved', s.c.aimX, s.c.aimY, { buttons: mouseDown ? 1 : 0 });
     if (!mouseDown) { await mouse('mousePressed', s.c.aimX, s.c.aimY); mouseDown = true; }
     if (s.c.dash) await tap('Space');
+    if (s.c.dejavu) await tap('KeyE');
     if (s.mode === 'play' && s.wave === 8 && !result) {
       const bossShot = await evaluate('gumdropDebug.game.boss && gumdropDebug.game.boss.phase');
       if (bossShot === 2 && !held.has('snapBoss')) { held.add('snapBoss'); await snap('04-boss-phase3'); held.delete('snapBoss'); }
@@ -100,6 +101,7 @@ try {
   for (const code of held) await key('keyUp', code);
   if (mouseDown) await mouse('mouseReleased', 640, 360);
   console.log('run ended:', JSON.stringify(result), 'picks', picks);
+  console.log('deja vu:', await evaluate('JSON.stringify({ unleashed: gumdropDebug.game.stats.dejavus, barrageKills: gumdropDebug.game.stats.dejavuKills, echoesLeft: gumdropDebug.game.dejavu.echoes.length })'));
   await sleep(1500);
   await snap('05-results');
   await tap('Enter');
