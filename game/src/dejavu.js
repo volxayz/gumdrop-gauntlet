@@ -96,7 +96,8 @@ export function updateDejavu(state, dt) {
   const b = dv.burst;
   if (!b) return;
   b.time += dt;
-  while (b.volleys < DEJAVU.volleys && b.time >= b.volleys * DEJAVU.volleyGap) {
+  // Echoes only fire while Gummo is still in the fight.
+  while (state.player.alive && b.volleys < DEJAVU.volleys && b.time >= b.volleys * DEJAVU.volleyGap) {
     for (const echo of b.echoes) volley(state, echo, b.volleys);
     b.volleys += 1;
     state.events.push({ type: 'dejavuVolley' });
