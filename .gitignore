@@ -1,0 +1,4 @@
+out/
+out2/
+*.tar.gz
+node_modules/
